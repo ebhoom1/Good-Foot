@@ -6,7 +6,7 @@ export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Video
-        source={require('../assets/VideoBackground.mp4')}
+        source={require('../assets/HomeVideo.MP4')}
         rate={1.0}
         volume={1.0}
         isMuted={false}
@@ -16,7 +16,6 @@ export default function HomeScreen({ navigation }) {
         style={StyleSheet.absoluteFill}
       />
       <View style={styles.overlay}>
-        <Text style={styles.title}>Good Foot</Text>
         <Pressable style={styles.tapToStart} onPress={() => navigation.navigate('CarbonFootprint')}>
           <Text style={styles.tapToStartText}>Tap to start</Text>
         </Pressable>
