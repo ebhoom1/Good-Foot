@@ -6,7 +6,7 @@ export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Video
-        source={require('../assets/HomeVideo.MP4')}
+        source={require('../assets/VideoBackground.mp4')} 
         rate={1.0}
         volume={1.0}
         isMuted={false}
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    // backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   title: {
     color: '#fff',
@@ -44,8 +44,12 @@ const styles = StyleSheet.create({
   },
   tapToStart: {
     position: 'absolute',
-    bottom: 100,
-    padding: 10,
+    bottom: 40,
+    padding: 20,
+    fontWeight:'bold',
+    backgroundColor:'green',
+    borderRadius:20,
+    
   },
   tapToStartText: {
     color: '#fff',
