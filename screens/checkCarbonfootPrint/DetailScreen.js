@@ -26,6 +26,9 @@ const DetailScreen = ({ navigation, route }) => {
         
        
         </View>
+        <View style={styles.container}>
+      <Text style={styles.text}>{`Country: ${country ? country.name : 'None selected'}`}</Text>
+    </View>
       
         <View style={styles.cardsContainer}>
           <Card 

@@ -20,12 +20,14 @@ import LoginScreen from './screens/Account/LoginScreen'; // New screen
 import CreateAccountScreen from './screens/Account/CreateAccountScreen'; // New screen
 
 import { LogBox } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function MainTabs() {
   return (
+
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
@@ -55,7 +57,9 @@ function MainTabs() {
 
 export default function App() {
   return (
-    <NavigationContainer>
+    <>
+    <StatusBar style='light'/>
+      <NavigationContainer>
       <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="CarbonFootprint" component={CarbonFootprintScreen} />
@@ -76,6 +80,8 @@ export default function App() {
         />
       </Stack.Navigator>
     </NavigationContainer>
+    </>
+  
   );
 }
 

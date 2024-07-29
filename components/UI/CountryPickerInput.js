@@ -1,10 +1,9 @@
-// CountryPickerInput.js
 import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import CountryPicker from 'react-native-country-picker-modal';
 import { Ionicons } from '@expo/vector-icons';
 
-const CountryPickerInput = ({ selectedCountry, setSelectedCountry }) => {
+const CountryPickerInput = ({ selectedCountry = null, setSelectedCountry }) => {
   const [visible, setVisible] = useState(false);
 
   const onSelect = (country) => {
@@ -18,7 +17,6 @@ const CountryPickerInput = ({ selectedCountry, setSelectedCountry }) => {
         <Text style={styles.inputText}>
           {selectedCountry ? ` ${selectedCountry.name}` : 'Select a country'}
         </Text>
-       
         <Ionicons name="chevron-down" size={20} />
       </TouchableOpacity>
       <CountryPicker
@@ -46,7 +44,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderWidth: 1,
     borderRadius: 5,
-    width:'80%'
+    width: '80%',
   },
   inputText: {
     fontSize: 16,
