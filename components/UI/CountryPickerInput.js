@@ -1,7 +1,8 @@
+// CountryPickerInput.js
 import React, { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
-import CountryPicker from 'react-native-country-picker-modal';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { countries } from './countries'
 
 const CountryPickerInput = ({ selectedCountry = null, setSelectedCountry }) => {
   const [visible, setVisible] = useState(false);
@@ -11,24 +12,33 @@ const CountryPickerInput = ({ selectedCountry = null, setSelectedCountry }) => {
     setVisible(false);
   };
 
+  const renderItem = ({ item }) => (
+    <TouchableOpacity style={styles.item} onPress={() => onSelect(item)}>
+      <Text style={styles.flag}>{item.flag}</Text>
+      <Text style={styles.name}>{item.name}</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => setVisible(true)} style={styles.inputContainer}>
         <Text style={styles.inputText}>
-          {selectedCountry ? ` ${selectedCountry.name}` : 'Select a country'}
+          {selectedCountry ? `${selectedCountry.flag} ${selectedCountry.name}` : 'Select a country'}
         </Text>
         <Ionicons name="chevron-down" size={20} />
       </TouchableOpacity>
-      <CountryPicker
-        visible={visible}
-        withEmoji
-        withFilter
-        withFlag
-        withCountryNameButton
-        onSelect={onSelect}
-        onClose={() => setVisible(false)}
-        containerButtonStyle={{ display: 'none' }}
-      />
+      <Modal visible={visible} animationType="slide">
+        <View style={styles.modalContainer}>
+          <TouchableOpacity onPress={() => setVisible(false)} style={styles.closeButton}>
+            <Ionicons name="close" size={24} />
+          </TouchableOpacity>
+          <FlatList
+            data={countries}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.code}
+          />
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -48,6 +58,29 @@ const styles = StyleSheet.create({
   },
   inputText: {
     fontSize: 16,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+  },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+  },
+  flag: {
+    fontSize: 24,
+    marginRight: 10,
+  },
+  name: {
+    fontSize: 18,
   },
 });
 

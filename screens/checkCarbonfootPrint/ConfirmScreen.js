@@ -11,7 +11,7 @@ const ConfirmScreen = ({ navigation }) => {
     navigation.navigate('Detail', {
       country: selectedCountry?.name || 'Unknown',
       carbonFootprint: '2.0',
-      additionalInfo: '...',
+      flag:selectedCountry?.flag ,
     });
   };
 
@@ -25,7 +25,10 @@ const ConfirmScreen = ({ navigation }) => {
       />
       <Text style={styles.title}>Please confirm</Text>
       <Text style={styles.subtitle}>your country of residence:</Text>
-      <CountryPickerInput selectedCountry={selectedCountry} setSelectedCountry={setSelectedCountry} />
+      <CountryPickerInput
+        selectedCountry={selectedCountry}
+        setSelectedCountry={setSelectedCountry}
+      />
       <CustomButton onPress={confirmed}>Confirm</CustomButton>
     </View>
   );

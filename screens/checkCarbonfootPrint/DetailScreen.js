@@ -6,7 +6,7 @@ import AnimatedText from '../../components/UI/AnimatedText';
 import IconButton from '../../components/Button/IconButton';  // Assuming you have an IconButton component
 
 const DetailScreen = ({ navigation, route }) => {
-  const { country, carbonFootprint, additionalInfo } = route.params;
+  const { country, carbonFootprint, flag } = route.params;
 
   return (
     <View style={styles.container}>
@@ -26,9 +26,7 @@ const DetailScreen = ({ navigation, route }) => {
         
        
         </View>
-        <View style={styles.container}>
-      <Text style={styles.text}>{`Country: ${country ? country.name : 'None selected'}`}</Text>
-    </View>
+       
       
         <View style={styles.cardsContainer}>
           <Card 
@@ -37,7 +35,7 @@ const DetailScreen = ({ navigation, route }) => {
           />
           <Card 
             delay={1000}
-            content={`On the top you see the average, annual ${country} footprint.`}
+            content={`On the top you see the average, annual ${flag} footprint.`}
           />
           <Card 
             delay={1500}
