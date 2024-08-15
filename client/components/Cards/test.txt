@@ -1,0 +1,11 @@
+{/* <View style={styles.sectionContainer}>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Recent Products</Text>
+        </View>
+        <View style={styles.contentBox}>
+          <Text style={styles.contentText}>You have not tracked anything yet!</Text>
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.buttonText}>Track Food</Text>
+          </TouchableOpacity>
+        </View>
+      </View> */}
