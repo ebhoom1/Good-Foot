@@ -12,20 +12,33 @@ const DropdownInputField = ({ label, options, selectedOption, onOptionSelect }) 
         <Text style={styles.dropdownText}>
           {selectedOption ? selectedOption : `Select ${label}`}
         </Text>
-        <Ionicons name="chevron-down" size={20} />
+        <Ionicons name="chevron-down" size={20} color="#333" />
       </TouchableOpacity>
-      <Modal visible={isVisible} transparent={true} animationType="slide">
-        <View style={styles.modalContainer}>
-          <FlatList
-            data={options}
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => { onOptionSelect(item); setIsVisible(false); }} style={styles.option}>
-                <Text style={styles.optionText}>{item}</Text>
-              </TouchableOpacity>
-            )}
-          />
-        </View>
+      <Modal visible={isVisible} transparent={true} animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} onPress={() => setIsVisible(false)}>
+          <View style={styles.modalContainer}>
+            <FlatList
+              data={options}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => { onOptionSelect(item); setIsVisible(false); }}
+                  style={[
+                    styles.option,
+                    selectedOption === item && styles.selectedOption // Highlight selected option
+                  ]}
+                >
+                  <Text style={[
+                    styles.optionText,
+                    selectedOption === item && styles.selectedOptionText // Highlight selected text
+                  ]}>
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </TouchableOpacity>
       </Modal>
     </View>
   );
@@ -38,33 +51,50 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 5,
+    color: '#333',
   },
   dropdown: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
+    padding: 12,
     borderWidth: 1,
-    borderRadius: 5,
+    borderColor: '#ccc',
+    borderRadius: 8,
     backgroundColor: '#fff',
   },
   dropdownText: {
     fontSize: 16,
+    color: '#333',
   },
-  modalContainer: {
+  modalOverlay: {
     flex: 1,
     justifyContent: 'center',
-    alignItems:'center',
-    marginTop:200,
-    backgroundColor: 'rgba(250, 249, 249, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    marginHorizontal: 20,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    elevation: 10,
   },
   option: {
-    padding: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: '#f0f0f0',
   },
   optionText: {
     fontSize: 16,
+    color: '#333',
+  },
+  selectedOption: {
+    backgroundColor: '#ffecf0', // Soft red highlight
+  },
+  selectedOptionText: {
+    color: '#ff5a5f', // Highlight selected text in red
   },
 });
 

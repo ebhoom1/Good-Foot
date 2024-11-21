@@ -2,22 +2,22 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-const AchievementsRecentProducts = () => {
+const AchievementsRecentProducts = ({ title, description, buttonText, onButtonPress }) => {
   const navigation = useNavigation(); // Hook to access the navigation prop
 
   return (
     <View>
       <View style={styles.sectionContainer}>
         <View style={styles.header}>
-          <Text style={styles.headerText}>Offset Your Carbon Footprint</Text>
+          <Text style={styles.headerText}>{title}</Text>
         </View>
         <View style={styles.contentBox}>
-          <Text style={styles.contentText}>Please offset your Carbon Footprint</Text>
+          <Text style={styles.contentText}>{description}</Text>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate('Offset')} // Navigate to OffsetScreen
+            onPress={onButtonPress} // Navigate to OffsetScreen or use custom handler
           >
-            <Text style={styles.buttonText}>Projects</Text>
+            <Text style={styles.buttonText}>{buttonText}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -39,10 +39,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'black',
-  },
-  headerLink: {
-    fontSize: 16,
-    color: '#1e90ff',
   },
   contentBox: {
     backgroundColor: '#f4f4f4',

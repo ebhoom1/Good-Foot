@@ -1,76 +1,116 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
 import { Video } from 'expo-av';
-import Card from '../../components/UI/Card';
-import AnimatedText from '../../components/UI/AnimatedText';
-import IconButton from '../../components/Button/IconButton'; // Assuming you have an IconButton component
-import RadioButton from '../../components/Button/RadioButton'; // Assuming you have a RadioButton component
+import FormUI from '../../components/UI/FormUI';
+import DropdownInputField from '../../components/UI/DropdownInputField';
+import CustomInputField from '../../components/UI/CustomInputField';
+import AddButton from '../../components/Button/AddButton';
+import CustomButton from '../../components/Button/CustomButton';
+import Toast from 'react-native-toast-message';
+
+const flightClasses = ['Economy', 'Business', 'First'];
 
 const TravelScreen = ({ navigation, route }) => {
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [flights, setFlights] = useState([]);
+  const [count, setCount] = useState(0); // Track the number of forms
+  const { userInfo } = route.params;
+
+  const addFlight = () => {
+    setFlights([...flights, { class: '', hours: 0 }]);
+    setCount(count + 1); // Increase count
+  };
+
+  const updateFlight = (index, key, value) => {
+    const newFlights = [...flights];
+    
+    if (key === 'hours') {
+      newFlights[index][key] = parseFloat(value) || 0;
+    } else {
+      newFlights[index][key] = value;
+    }
+
+    setFlights(newFlights);
+  };
+
+  const removeFlight = (index) => {
+    const newFlights = flights.filter((_, i) => i !== index);
+    setFlights(newFlights);
+    setCount(count - 1); // Decrease count
+  };
+
   const confirmed = () => {
-    navigation.navigate('Food');
-  }
+    // Check for empty fields
+    for (let i = 0; i < flights.length; i++) {
+      const flight = flights[i];
+      if (!flight.class || flight.hours === 0) {
+        Toast.show({
+          type: 'error',
+          text1: 'Input Required',
+          text2: `Please fill out all fields for flight ${i + 1}.`,
+        });
+        return;
+      }
+    }
 
+    navigation.navigate('ElectricityScreen', { 
+      userInfo, 
+      vehicles: route.params.vehicles,  // Pass the vehicles from LocalTravelScreen
+      flights, 
+      count: route.params.count // Pass the count from LocalTravelScreen
+    });
+  };
 
-  const options = [
-    { label: '💺I fly rarely or never', value: 'rarely' },
-    { label: ' ✈️ Occasionally', value: 'occasionally' },
-    { label: '🚁Regularly', value: 'regularly' },
-    { label: '✍️Enter custom amount', value: 'custom' },
-  ];
-  
- 
   return (
-    <View style={styles.container}>
-      <Video
-        source={require('../../assets/travel.mp4')}
-        style={styles.backgroundVideo}
-        resizeMode="cover"
-        shouldPlay
-        isLooping
-        isMuted
-      />
-      <View style={styles.overlay}>
-        <View style={styles.animatedTextContainer}>
-          <AnimatedText delay={500}>
-            <Text style={styles.text}>3.33</Text>
-            <Text style={styles.text}> Tons CO²e</Text>
-          </AnimatedText>
-        </View>
-      
-        <View style={styles.cardsContainer}>
-          <Card 
-            delay={500}
-            content="How would you describe your flying habits in a typical, average year?"
-          />
-          
-        </View>
-        
-        <View style={styles.radioButtonContainer}>
-          {options.map(option => (
-            <RadioButton
-              key={option.value}
-              label={option.label}
-              value={option.value}
-              checked={selectedOption === option.value}
-              onPress={() => setSelectedOption(option.value)}
-            />
-          ))}
-        </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <Video
+          source={require('../../assets/travel.mp4')}
+          style={styles.backgroundVideo}
+          resizeMode="cover"
+          shouldPlay
+          isLooping
+          isMuted
+        />
+        <KeyboardAvoidingView
+          style={styles.overlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={100}
+        >
+          <View style={styles.questionContainer}>
+            <Text style={styles.questionText}>Add your flight details</Text>
+          </View>
+          <AddButton onPress={addFlight} />
 
-        {selectedOption && (
+          {flights.length > 0 && (
+            <ScrollView contentContainerStyle={styles.formsContainer}>
+              {flights.map((flight, index) => (
+                <FormUI key={index} onClose={() => removeFlight(index)} showCloseButton>
+                  <DropdownInputField
+                    label="Flight Class"
+                    options={flightClasses}
+                    selectedOption={flight.class}
+                    onOptionSelect={(value) => updateFlight(index, 'class', value)}
+                  />
+                  <CustomInputField
+                    label="Flight Hours"
+                    value={flight.hours.toString()}
+                    onChangeText={(value) => updateFlight(index, 'hours', value)}
+                    placeholder="Enter flight hours"
+                    keyboardType="numeric"
+                  />
+                </FormUI>
+              ))}
+            </ScrollView>
+          )}
+        </KeyboardAvoidingView>
+        {flights.length > 0 && (
           <View style={styles.buttonContainer}>
-            <IconButton 
-              icon="arrow-forward"  
-              size={24}
-              color="white"
-              onPress={confirmed}
-            />
+            <CustomButton onPress={confirmed}>Next</CustomButton>
           </View>
         )}
+        <Toast />
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -87,34 +127,28 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     padding: 20,
   },
-  animatedTextContainer: {
-    position: 'absolute',
-    top: 50,
-    alignItems: 'center',
-  },
-  cardsContainer: {
-    width: '100%',
+  questionContainer: {
+    marginTop: 100,
     marginBottom: 20,
   },
-  radioButtonContainer: {
+  questionText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+  },
+  formsContainer: {
     width: '100%',
-    padding: 20,
+    alignItems: 'center',
   },
   buttonContainer: {
     width: '100%',
     alignItems: 'center',
-    marginTop: 20,
-  },
-  text: {
-    color: 'white',
-    fontSize: 28,
-    textAlign: 'center',
-    fontWeight: 'bold',
   },
 });
 

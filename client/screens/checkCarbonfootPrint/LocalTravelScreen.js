@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
 import { Video } from 'expo-av';
 import FormUI from '../../components/UI/FormUI';
 import DropdownInputField from '../../components/UI/DropdownInputField';
@@ -9,7 +9,7 @@ import CustomButton from '../../components/Button/CustomButton';
 import Toast from 'react-native-toast-message';
 
 const vehicleTypes = ['Car', 'Bike', 'Scooter'];
-const fuelTypes = ['petrol', 'diesel', 'ev', 'cng'];
+const fuelTypes = ['petrol', 'diesel', 'electric', 'cng'];
 
 const LocalTravelScreen = ({ navigation, route }) => {
   const [vehicles, setVehicles] = useState([]);
@@ -53,11 +53,11 @@ const LocalTravelScreen = ({ navigation, route }) => {
       }
     }
 
-    navigation.navigate('ElectricityScreen', { userInfo, vehicles, count });
+    navigation.navigate('FlightTravel', { userInfo, vehicles, count });
   };
 
   return (
-    <>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <Video
           source={require('../../assets/localTravel.mp4')}
@@ -112,14 +112,14 @@ const LocalTravelScreen = ({ navigation, route }) => {
             </ScrollView>
           )}
         </KeyboardAvoidingView>
+        {vehicles.length > 0 && (
+          <View style={styles.buttonContainer}>
+            <CustomButton onPress={confirmed}>Next</CustomButton>
+          </View>
+        )}
+        <Toast />
       </View>
-      {vehicles.length > 0 && (
-        <View style={styles.buttonContainer}>
-          <CustomButton onPress={confirmed}>Next</CustomButton>
-        </View>
-      )}
-      <Toast />
-    </>
+    </TouchableWithoutFeedback>
   );
 };
 

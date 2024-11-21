@@ -8,7 +8,7 @@ const ResultScreen = ({ route, navigation }) => {
   const { totalCarbonFootprint } = route.params;
 
   const confirmed = () => {
-    navigation.navigate('MainTabs');
+    navigation.navigate('CreateAccount');
   };
 
   return (

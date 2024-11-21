@@ -23,7 +23,7 @@ const DetailScreen = ({ navigation, route }) => {
         <View style={styles.cardsContainer}>
           <Card 
             delay={500}
-            content={`Name: ${userInfo.userName}\nCountry: ${userInfo.country}\nState: ${userInfo.state}\nDate: ${userInfo.startDate}`}
+            content={`Name: ${userInfo.userName}\nCountry: ${userInfo.country}\nState: ${userInfo.state}\nDate: ${userInfo.startDate},\nemail:${userInfo.email},\nnumber:${userInfo.mobileNumber}`}
           />
           <Card 
             delay={1000}
@@ -38,7 +38,7 @@ const DetailScreen = ({ navigation, route }) => {
         <View style={styles.buttonContainer}>
           <IconButton 
             icon="arrow-forward"  
-            onPress={() => navigation.navigate('Localtravel', { userInfo })}  
+            onPress={() => navigation.navigate('LocalTravel', { userInfo })}  
             title="Next"
             size={24}
             color="white"

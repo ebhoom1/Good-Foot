@@ -16,7 +16,11 @@ const vehicleSchema = new mongoose.Schema({
     averageFuelEfficiency: { type: Number, required: true }, // Average fuel efficiency (e.g., km per liter)
     totalCO2EmissionsOfVehicle: { type: String, required: true } // Total CO2 emissions of vehicle with unit
 });
-
+const flightSchema = new mongoose.Schema({
+    class: { type: String, required: true }, // Economy, Business, First
+    hours: { type: Number, required: true }, // Duration of the flight in hours
+    totalCO2EmissionsOfFlight: { type: String, required: true } // Total CO2 emissions of flight with unit
+});
 const footprintSchema = new mongoose.Schema({
     userId: { type: String, required: true },
     userName: { type: String, required: true },
@@ -25,12 +29,16 @@ const footprintSchema = new mongoose.Schema({
     totalWeeks: { type: Number, required: true },
     totalDays: { type: Number, required: true },
     vehicles: [vehicleSchema], // Array of vehicles
+    flights: [flightSchema],
     electricityUsage: { type: Number,  }, // Electricity usage in kWh
     totalElectricityUsage: Number,
     totalCO2EmissionsOfElectricity: { type: String, required: true, default: '0' }, // Total CO2 emissions of electricity with unit
     totalCarbonFootprint: { type: String, required: true, default: '0' }, // Calculated total carbon footprint with unit
     country: { type: String, required: true }, // Country field
-    state: { type: String, required: true } // State field
+    state: { type: String, required: true }, // State field
+    email: { type: String, required: false }, // New field for email
+    mobileNumber: { type: String, required: false } // New field for mobile number
+
 });
 
 module.exports = mongoose.model('Footprint', footprintSchema);

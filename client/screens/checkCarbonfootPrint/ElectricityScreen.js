@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, KeyboardAvoidingView, TouchableWithoutFeedback,Keyboard, Platform } from 'react-native';
 import { Video } from 'expo-av';
 import FormUI from '../../components/UI/FormUI';
 import CustomInputField from '../../components/UI/CustomInputField';
@@ -9,7 +9,7 @@ import axios from 'axios';
 import { API_URL } from '../../util/api';
 
 const ElectricityScreen = ({ navigation, route }) => {
-  const { userInfo, vehicles } = route.params;
+  const { userInfo, vehicles, flights } = route.params;
   const [electricityUsage, setElectricityUsage] = useState('');
 
   const confirmed = async () => {
@@ -28,7 +28,10 @@ const ElectricityScreen = ({ navigation, route }) => {
       country: userInfo.country,
       state: userInfo.state,
       vehicles,
+      flights,
       electricityUsage: parseFloat(electricityUsage),
+      email: userInfo.email, // Ensure this is passed
+      mobileNumber: userInfo.mobileNumber,
     };
 
     console.log('Sending data to backend:', data);
@@ -48,6 +51,7 @@ const ElectricityScreen = ({ navigation, route }) => {
 
   return (
     <>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <Video
           source={require('../../assets/electricity.mp4')}
@@ -71,17 +75,18 @@ const ElectricityScreen = ({ navigation, route }) => {
                 label="Electricity Usage (kWh)"
                 value={electricityUsage}
                 onChangeText={setElectricityUsage}
-                placeholder="Enter electricity usage"
+                placeholder="electricity usage"
                 keyboardType="numeric"
               />
             </FormUI>
           </ScrollView>
         </KeyboardAvoidingView>
+        <View style={styles.buttonContainer}>
+          <CustomButton onPress={confirmed}>Submit</CustomButton>
+        </View>
+        <Toast />
       </View>
-      <View style={styles.buttonContainer}>
-        <CustomButton onPress={confirmed}>Submit</CustomButton>
-      </View>
-      <Toast /> 
+    </TouchableWithoutFeedback>
     </>
   );
 };

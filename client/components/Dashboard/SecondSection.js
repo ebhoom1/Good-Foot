@@ -1,21 +1,134 @@
 // components/Dashboard/SecondSection.js
 
-import React from 'react';
+import React, { useCallback,useState,useEffect } from 'react';
+
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Svg, Circle, G, Text as SvgText } from 'react-native-svg';
+import { Svg, Circle, G, Text as SvgText,Rect } from 'react-native-svg';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import AchievementsRecentProducts from '../Cards/AchievementsRecentProducts';
+import { useNavigation } from '@react-navigation/native';
+import { API_URL } from '../../util/api';
 
 const screenWidth = Dimensions.get('window').width;
 
 const SecondSection = ({ dailyEmissions = [0.9, 0.5, 0.3, 0.6, 0.2, 0.9, 0.8], weeklyGoals = [100, 50, 20, 85, 15, 10, 0] }) => {
+  const navigation = useNavigation(); // Hook to access the navigation prop
+  const [totalPoints, setTotalPoints] = useState(null); // For total points
+  const [totalCarbonEmissions, setTotalCarbonEmissions] = useState(null); // For total carbon emissions
+  const [monthlyEmissions, setMonthlyEmissions] = useState([]); // For monthly emissions
+  // Fetch user data including totalPoints and totalCarbonEmissions
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        if (token) {
+          const config = {
+            headers: { Authorization: `Bearer ${token}` }
+          };
+          const response = await axios.get(`${API_URL}/api/users/me`, config);
+          const userData = response.data.user;
+
+          // Set totalPoints and totalCarbonEmissions from the response
+          setTotalPoints(userData.totalPoints || 'N/A'); 
+          setTotalCarbonEmissions(userData.carbonFootprint?.totalCO2Emissions || 0);
+
+          // Fetch carbonFootprintHistory for graph data
+          const footprintHistory = userData.carbonFootprintHistory || [];
+          setMonthlyEmissions(footprintHistory); // Setting monthly emissions
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        Alert.alert('Error', 'Unable to fetch user data.');
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // Navigation handlers
+  const handleNavigateMonthlyCalculator = useCallback(() => {
+    navigation.navigate('MonthlyCalculator');
+  }, [navigation]);
+
+  const handleNavigateOffset = useCallback(() => {
+    navigation.navigate('MonthlyCalculator');
+  }, [navigation]);
+
+  const renderGraph = () => {
+    if (monthlyEmissions.length === 0) {
+        return <Text>No data available for graph</Text>;
+    }
+
+    const graphWidth = screenWidth - 40; // Total width of the graph
+    const graphHeight = 100; // Adjusted height of the graph to fit within trends section
+    const barWidth = graphWidth / monthlyEmissions.length - 65; // Width of each bar with padding between
+
+    // Find the maximum CO2 value to scale the bars correctly
+    const maxCO2Emission = Math.max(...monthlyEmissions.map(item => item.totalCO2Emissions || 0));
+
+    return (
+        <Svg height={graphHeight + 40} width={graphWidth}> 
+            {monthlyEmissions.map((item, index) => {
+                const barHeight = (item.totalCO2Emissions / maxCO2Emission) * graphHeight || 0; // Calculate height of each bar
+                const month = item.month || 'N/A'; // Extract month data
+                
+                return (
+                    <G key={index} transform={`translate(${index * (barWidth + 20)}, 0)`}>
+                        {/* Bar Rect */}
+                        <Rect
+                            x="5" // Adjust X to add padding inside each bar
+                            y={graphHeight - barHeight} // Align bar top
+                            width={barWidth} // Bar width 
+                            height={barHeight} // Bar height scaled to max CO2
+                            fill="#10ac84"
+                        />
+                        {/* Month Labels */}
+                        <SvgText
+                            x={barWidth / 2}
+                            y={graphHeight + 15} // Below the bars
+                            fontSize="10"
+                            fill="black"
+                            textAnchor="middle"
+                        >
+                            {month}
+                        </SvgText>
+                        {/* CO2 Values above bars */}
+                        <SvgText
+                            x={barWidth / 2}
+                            y={graphHeight - barHeight - 5} // Above the bar
+                            fontSize="10"
+                            fill="black"
+                            textAnchor="middle"
+                        >
+                            {item.totalCO2Emissions.toFixed(1)}
+                        </SvgText>
+                    </G>
+                );
+            })}
+        </Svg>
+    );
+};
+
+
+  
   return (
     <View style={styles.container}>
+                   
+      <AchievementsRecentProducts
+        title="Monthly Carbon Footprint"
+        description="Calculate your monthly carbon emission here."
+        buttonText="Find"
+        onButtonPress={handleNavigateMonthlyCalculator}
+      />
       <LinearGradient
         colors={['#1dd1a1', '#10ac84']}
         style={styles.leaderboard}
       >
+  
+
         <View style={styles.leaderboardTextContainer}>
           <Text style={styles.leaderboardText}>Leaderboard</Text>
           <Text style={styles.leaderboardPlace}>10451th place</Text>
@@ -71,25 +184,17 @@ const SecondSection = ({ dailyEmissions = [0.9, 0.5, 0.3, 0.6, 0.2, 0.9, 0.8], w
         <Text style={styles.highlightsMore}>See more</Text>
       </View>
       <View style={styles.highlights}>
-        <View style={styles.highlightBox}>
-          <View style={styles.highlightHeader}>
-            <Text style={styles.highlightLabel}>Tracked Items</Text>
-            <FontAwesome5 name="question-circle" size={16} color="#34495e" />
-          </View>
-          <Text style={styles.highlightValue}>
-            0 <FontAwesome5 name="shoe-prints" size={16} color="black" />
-          </Text>
-        </View>
-        <View style={styles.highlightBox}>
+       
+      <View style={styles.highlightBox}>
           <View style={styles.highlightHeader}>
             <Text style={styles.highlightLabel}>CO2e Tracked</Text>
             <FontAwesome5 name="question-circle" size={16} color="#34495e" />
           </View>
           <Text style={styles.highlightValue}>
-            0 kg <FontAwesome5 name="thumbtack" size={16} color="black" />
+            {totalCarbonEmissions} kg <FontAwesome5 name="globe" size={16} color="black" />
           </Text>
         </View>
-        <View style={styles.highlightBox}>
+        <View style={styles.highlightBox}>  
           <View style={styles.highlightHeader}>
             <Text style={styles.highlightLabel}>Trees Planted</Text>
             <FontAwesome5 name="question-circle" size={16} color="#34495e" />
@@ -118,103 +223,35 @@ const SecondSection = ({ dailyEmissions = [0.9, 0.5, 0.3, 0.6, 0.2, 0.9, 0.8], w
         </View>
         <View style={styles.highlightBox}>
           <View style={styles.highlightHeader}>
-            <Text style={styles.highlightLabel}>Tracking Streak</Text>
+            <Text style={styles.highlightLabel}>Total Score</Text>
             <FontAwesome5 name="question-circle" size={16} color="#34495e" />
           </View>
           <Text style={styles.highlightValue}>
-            0 Days <FontAwesome5 name="fire" size={16} color="black" />
+            {totalPoints} <FontAwesome5 name="coins" size={16} color="black" />
           </Text>
         </View>
+        
       </View>
+      
+      
       <View style={styles.trendsHeader}>
         <Text style={styles.trendsText}>Trends</Text>
         <Text style={styles.trendsMore}>What's this?</Text>
       </View>
+      
       <View style={styles.trends}>
         <View style={styles.trendBox}>
-          <View style={styles.trendHeader}>
-            <Text style={styles.trendLabel}>Daily Emissions</Text>
-            <FontAwesome5 name="info-circle" size={16} color="#34495e" />
-          </View>
-          <Text style={styles.trendSubtitle}>Last 7 days</Text>
-          <Text style={styles.trendValue}>0 kg</Text>
-          <Text style={styles.trendSubtitle}>Avg CO2e</Text>
-          <View style={styles.trendChart}>
-            {dailyEmissions.map((value, index) => (
-              <View
-                key={index}
-                style={[styles.trendBar, { height: value * 50 }]} // Adjust the multiplier as needed
-              ></View>
-            ))}
-          </View>
-          <View style={styles.trendDays}>
-            <Text style={styles.trendDay}>M</Text>
-            <Text style={styles.trendDay}>T</Text>
-            <Text style={styles.trendDay}>W</Text>
-            <Text style={styles.trendDay}>T</Text>
-            <Text style={styles.trendDay}>F</Text>
-            <Text style={styles.trendDay}>S</Text>
-            <Text style={styles.trendDay}>S</Text>
-          </View>
-        </View>
-        <View style={styles.trendBox}>
-          <View style={styles.trendHeader}>
-            <Text style={styles.trendLabel}>Weekly Goals</Text>
-            <FontAwesome5 name="info-circle" size={16} color="#34495e" />
-          </View>
-          <Text style={styles.trendSubtitle}>Last 7 days</Text>
-          <Text style={styles.trendValue}>0/7</Text>
-          <Text style={styles.trendSubtitle}>Achieved</Text>
-          <View style={styles.trendCircles}>
-            {weeklyGoals.map((value, index) => (
-              <Svg height="30" width="30" key={index}>
-                <G rotation="-90" origin="15, 15">
-                  <Circle
-                    cx="15"
-                    cy="15"
-                    r="13"
-                    stroke="#bdc3c7"
-                    strokeWidth="2"
-                    fill="none"
-                  />
-                  <Circle
-                    cx="15"
-                    cy="15"
-                    r="13"
-                    stroke="#10ac84"
-                    strokeWidth="2"
-                    fill="none"
-                    strokeDasharray={`${(value * 2 * Math.PI * 13) / 100}, ${
-                      2 * Math.PI * 13
-                    }`}
-                  />
-                  <SvgText
-                    x="15"
-                    y="18"
-                    fontSize="12"
-                    fill="black"
-                    textAnchor="middle"
-                    alignmentBaseline="middle"
-                  >
-                    {value}%
-                  </SvgText>
-                </G>
-              </Svg>
-            ))}
-          </View>
-          <View style={styles.trendDays}>
-            <Text style={styles.trendDay}>M</Text>
-            <Text style={styles.trendDay}>T</Text>
-            <Text style={styles.trendDay}>W</Text>
-            <Text style={styles.trendDay}>T</Text>
-            <Text style={styles.trendDay}>F</Text>
-            <Text style={styles.trendDay}>S</Text>
-            <Text style={styles.trendDay}>S</Text>
-          </View>
+          <Text style={styles.trendLabel}>Month Emission Graph</Text>
+          <View style={styles.trendChart}>{renderGraph()}</View>
         </View>
       </View>
-      <AchievementsRecentProducts/>
-    </View>
+      <AchievementsRecentProducts
+        title="Track Your Achievements"
+        description="View your recent achievements and carbon reduction projects."
+        buttonText="View Projects"
+        onButtonPress={handleNavigateOffset} // Custom navigation
+      />
+        </View>
   );
 };
 
@@ -228,6 +265,7 @@ const styles = StyleSheet.create({
   leaderboard: {
     borderRadius: 10,
     padding: 15,
+    marginTop:20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -373,22 +411,29 @@ const styles = StyleSheet.create({
   },
   trends: {
     marginTop: 20,
+    marginBottom: 20, // Adjusted to ensure proper spacing
   },
   trendBox: {
     backgroundColor: '#f4f4f4',
     borderRadius: 10,
     padding: 15,
     marginBottom: 20,
+    height: 180, // Adjusted height to fit the graph
+  },
+  trendChart: {
+    height: 120, // Set a specific height for the trend chart container
   },
   trendHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    
   },
   trendLabel: {
     color: 'black',
     fontSize: 16,
     fontWeight: 'bold',
+    marginBottom:25,
   },
   trendSubtitle: {
     color: '#7f8c8d',
@@ -401,13 +446,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 10,
   },
-  trendChart: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginTop: 10,
-    height: 50,
-  },
+  
   trendBar: {
     width: 20,
     backgroundColor: '#b4babd',

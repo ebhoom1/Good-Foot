@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "client",
-    "slug": "client",
+    "name": "goodfoot",
+    "slug": "goodfoot",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,11 +14,9 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.goodfoot.client"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,18 +24,31 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.goodfoot.client",
-      "versionCode": 1,
-      "enableProguardInReleaseBuilds": true,
-      "useNextNotificationsApi": true,
-      "permissions": []
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "extra": {
+      "expoClientId": "1063759105201-ehu76e3hqv2gdl6lsh3sgna732rivil7.apps.googleusercontent.com",
+      "iosClientId": "1063759105201-gvgjpjot4bfshjgssf7eljgms0f8hulm.apps.googleusercontent.com",
+      "androidClientId": "1063759105201-q6p2mrrcjtg9h58elvov13n7fbrk2mgc.apps.googleusercontent.com",
       "eas": {
-        "projectId": "your-expo-project-id"
+        "projectId": "50600e80-40a0-4079-acf4-855de91a3786"
       }
-    }
+    },
+    "scheme": "goodfoot",
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera.",
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos."
+        }
+      ]
+    ],
+    "owner": "goodfoot"
   }
 }

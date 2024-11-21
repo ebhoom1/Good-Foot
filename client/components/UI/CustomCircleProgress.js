@@ -20,7 +20,7 @@ const CustomCircleProgress = ({ data, chartConfig, value }) => {
       />
       <View style={styles.valueContainer}>
         <Text style={styles.valueText}>{value}</Text>
-        <Text style={styles.labelText}>Remaining CC</Text>
+        <Text style={styles.labelText}>Kg CO2</Text>
       </View>
     </View>
   );

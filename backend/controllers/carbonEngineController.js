@@ -54,6 +54,31 @@ const calculateCO2EmissionsOfVehicle = (vehicles) => {
     });
 };
 
+// Calculate CO2 emissions for flights
+const calculateCO2EmissionsOfFlight = (flights) => {
+    return flights.map(flight => {
+        let emissionFactor = 0;
+
+        switch (flight.class.toLowerCase()) {
+            case 'economy':
+                emissionFactor = 75.05; // kg CO2 per hour
+                break;
+            case 'business':
+                emissionFactor = 187.63; // kg CO2 per hour
+                break;
+            case 'first':
+                emissionFactor = 225.15; // kg CO2 per hour
+                break;
+            default:
+                throw new Error('Unknown flight class');
+        }
+
+        const totalCO2EmissionsOfFlight = flight.hours * emissionFactor;
+        return { ...flight, totalCO2EmissionsOfFlight: totalCO2EmissionsOfFlight.toFixed(2) + ' kg' };
+    });
+};
+
+
 // Fetch the emission factor from the database and calculate the total CO2 emissions of electricity
 const calculateTotalCO2EmissionsOfElectricity = async (country, state, electricityUsage, totalMonths) => {
     const emissionFactorRecord = await EmissionFactor.findOne({ country });
@@ -72,23 +97,40 @@ const calculateTotalCO2EmissionsOfElectricity = async (country, state, electrici
 };
 
 // Calculate the total carbon footprint
-const calculateTotalCarbonFootprint = (vehicles, totalCO2EmissionsOfElectricity) => {
+const calculateTotalCarbonFootprint = (vehicles, totalCO2EmissionsOfElectricity,flights) => {
     const vehicleCarbonFootprint = vehicles.reduce((acc, vehicle) => acc + vehicle.totalCO2EmissionsOfVehicle, 0);
-    const total = vehicleCarbonFootprint + totalCO2EmissionsOfElectricity;
+    const flightCarbonFootprint = flights.length > 0 ? flights.reduce((acc, flight) => acc + parseFloat(flight.totalCO2EmissionsOfFlight), 0) : 0;    
+    const total = vehicleCarbonFootprint + flightCarbonFootprint + totalCO2EmissionsOfElectricity;
     return total;
 };
 
 // Create a new user footprint
 const createUserFootprint = async (req, res) => {
-    const { userName, startDate, vehicles, country, state, electricityUsage } = req.body;
+    const { userName, startDate, vehicles, flights = [], country, state, electricityUsage, email, mobileNumber } = req.body;
 
-    if (!userName || !startDate || !vehicles || vehicles.length === 0 || !country || !state || !electricityUsage) {
+    if (!userName || !startDate || !vehicles || !country || !state || !electricityUsage) {
         return res.status(400).json({ message: 'User name, start date, country, state, electricity usage, and vehicle details are required' });
+    }
+
+    // Check if either email or mobile number exists, based on which one is provided
+    if (email) {
+        const existingUserWithEmail = await Footprint.findOne({ email });
+        if (existingUserWithEmail) {
+            return res.status(400).json({ message: 'Email already exists' });
+        }
+    }
+
+    if (mobileNumber) {
+        const existingUserWithMobile = await Footprint.findOne({ mobileNumber });
+        if (existingUserWithMobile) {
+            return res.status(400).json({ message: 'Mobile number already exists' });
+        }
     }
 
     const parsedStartDate = parseDate(startDate);
     const userId = await generateUserId(userName);
     const vehiclesWithCO2Emissions = calculateCO2EmissionsOfVehicle(vehicles);
+    const flightsWithCO2Emissions = flights.length > 0 ? calculateCO2EmissionsOfFlight(flights) : [];
 
     const totalDays = Math.floor((new Date() - parsedStartDate) / (1000 * 60 * 60 * 24));
     const totalWeeks = Math.floor(totalDays / 7);
@@ -102,7 +144,7 @@ const createUserFootprint = async (req, res) => {
         return res.status(400).json({ message: err.message });
     }
 
-    const totalCarbonFootprint = calculateTotalCarbonFootprint(vehiclesWithCO2Emissions, totalCO2EmissionsOfElectricity);
+    const totalCarbonFootprint = calculateTotalCarbonFootprint(vehiclesWithCO2Emissions, totalCO2EmissionsOfElectricity, flightsWithCO2Emissions);
 
     const formattedStartDate = formatDate(parsedStartDate);
 
@@ -114,12 +156,15 @@ const createUserFootprint = async (req, res) => {
         totalWeeks,
         totalDays,
         vehicles: vehiclesWithCO2Emissions,
+        flights: flightsWithCO2Emissions,
         electricityUsage,
-        totalElectricityUsage, // Save total electricity usage
+        totalElectricityUsage,
         totalCO2EmissionsOfElectricity,
         totalCarbonFootprint,
         country,
-        state
+        state,
+        email,
+        mobileNumber
     });
 
     try {
@@ -130,4 +175,7 @@ const createUserFootprint = async (req, res) => {
     }
 };
 
-module.exports = { createUserFootprint };
+
+
+
+module.exports = { createUserFootprint };   
